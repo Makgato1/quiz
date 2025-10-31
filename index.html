@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>JS Quiz App</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<style>body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #ffe6f0, #f3e8ff);
+  text-align: center;
+  padding: 50px;
+}
+
+
+#quiz-container {
+  background: rgba(78, 6, 245, 0.432);
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 600px;
+  margin: auto;
+  box-shadow: 0 0 10px rgb(245, 245, 245);
+}
+button {
+  padding: 12px 24px;
+  margin: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  background: linear-gradient(135deg, #ff7eb9, #ff65a3, #ff85c1);
+  border: none;
+  border-radius: 25px; /* makes them rounded & cute */
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(255, 105, 180, 0.4);
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background: linear-gradient(135deg, #ffb6f9, #ff7eb9, #ff65a3);
+  box-shadow: 0 6px 14px rgba(255, 105, 180, 0.6);
+  transform: scale(1.05);
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+button {
+  padding: 10px 20px;
+  margin: 10px;
+  font-size: 16px;
+  color:blueviolet;
+}
+
+.correct {
+  color: green;
+}
+
+.wrong {
+  color: red;
+}
+
+#timer-bar {
+  height: 20px;              /* thicker bar */
+  background: linear-gradient(90deg, #ff7eb9, #ff65a3, #ff85c1);
+  border-radius: 10px;       /* rounded ends */
+  transition: width 1s linear;
+  box-shadow: 0 4px 8px rgba(255, 105, 180, 0.4); /* soft glow */
+}
+</style>
+<body>
+
+  <div id="quiz-container">
+    <h2 id="question">Loading...</h2>
+    <div id="choices"></div>
+    <button id="next-btn" onclick="nextQuestion()" disabled>Next</button>
+    <p id="feedback"></p>
+    <p id="score-display"></p>
+    <p id="timer">Time left: 30s</p>
+    <button id="restart-btn" onclick="restartQuiz()" style="display:none;">Restart Quiz</button>
+  </div>
+
+  <script>"use strict";
+
+// Quiz questions
+const questions = [
+  {
+    question: "What does DOM stand for?",
+    choices: ["Document Object Model", "Data Object Method", "Desktop Order Manager", "Dynamic Output Module"],
+    correct: 0
+  },
+  {
+    question: "Which symbol is used for single-line comments in JS?",
+    choices: ["<!--", "//", "**", "##"],
+    correct: 1
+  },
+  {
+    question: "Which of these is NOT a JavaScript data type?",
+    choices: ["Number", "Boolean", "Float", "String"],
+    correct: 2
+  }
+];
+
+//function to start or reset the timer
+function startTimer() {
+  timeLeft = 30;
+  document.getElementById("timer").textContent = `Time left: ${timeLeft}s`;
+
+  timerId = setInterval(() => {
+    timeLeft--;
+    document.getElementById("timer").textContent = `Time left: ${timeLeft}s`;
+
+    if (timeLeft <= 0) {
+      clearInterval(timerId);
+      feedbackEl.textContent = "⏱️ Time's up!";
+      feedbackEl.className = "wrong";
+      Array.from(choicesEl.children).forEach(btn => btn.disabled = true);
+      nextBtn.disabled = false;
+    }
+  }, 1000);
+}
+
+// Global variables
+let currentQuestion = 0;
+let score = 0;
+let timeLeft = 30;
+let timerId;
+
+
+// DOM elements
+const questionEl = document.getElementById("question");
+const choicesEl = document.getElementById("choices");
+const feedbackEl = document.getElementById("feedback");
+const nextBtn = document.getElementById("next-btn");
+const scoreDisplay = document.getElementById("score-display");
+
+// Display the current question
+function showQuestion() {
+  nextBtn.disabled = true;
+  feedbackEl.textContent = "";
+  const q = questions[currentQuestion];
+  questionEl.textContent = `Q${currentQuestion + 1}: ${q.question}`;
+  choicesEl.innerHTML = "";
+  clearInterval(timerId); // Stop previous timer
+  startTimer();           // Start new one
+
+
+  q.choices.forEach((choice, index) => {
+    const btn = document.createElement("button");
+    btn.textContent = choice;
+    btn.onclick = () => checkAnswer(index);
+    choicesEl.appendChild(btn);
+  });
+}
+
+// Check the selected answer
+function checkAnswer(selectedIndex) {
+  const correctIndex = questions[currentQuestion].correct;
+  clearInterval(timerId);
+  if (selectedIndex === correctIndex) {
+    feedbackEl.textContent = "✅ Correct!";
+    feedbackEl.className = "correct";
+    score++;
+  } else {
+    feedbackEl.textContent = `❌ Wrong! Correct answer: ${questions[currentQuestion].choices[correctIndex]}`;
+    feedbackEl.className = "wrong";
+  }
+
+  // Disable all buttons
+  Array.from(choicesEl.children).forEach(btn => btn.disabled = true);
+  nextBtn.disabled = false;
+}
+
+// Move to the next question
+function nextQuestion() {
+  currentQuestion++;
+
+  if (currentQuestion < questions.length) {
+    showQuestion();
+  } else {
+    endQuiz();
+  }
+}
+
+// Show final score
+function endQuiz() {
+  questionEl.textContent = "Quiz Complete!";
+  choicesEl.innerHTML = "";
+  nextBtn.style.display = "none";
+  feedbackEl.textContent = "";
+  scoreDisplay.textContent = `Your Score: ${score} out of ${questions.length}`;
+  clearInterval(timerId);
+  document.getElementById("timer").textContent = ""; // Clear timer
+  
+}
+
+// Start the quiz
+showQuestion();
+
+
+
+</script>
+</body>
+</html>
